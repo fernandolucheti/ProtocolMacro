@@ -1,17 +1,18 @@
-# ProtocolMacro
-A macro that produces a protocol based on a class/struct public interface
+import SwiftSyntax
+import SwiftSyntaxBuilder
+import SwiftSyntaxMacros
+import SwiftSyntaxMacrosTestSupport
+import XCTest
+import ProtocolMacros
 
-## Usage
- 1 - add ProtocolMacro as a dependency  
- 2 - import ProtocolMacro  
- 3 - mark your class or struct with the macro @Protocol  
- 4 - Add conformance to generated protocol (its name is your Type suffixed by 'Protocol'): {YourTypeHere}Protocol  
+let testMacros: [String: Macro.Type] = [
+    "Protocol": ProtocolMacro.self,
+]
 
-## example
-```swift
-import ProtocolMacro
-@Protocol
-struct ViewModel: ViewModelProtocol {
+final class ProtocolMacroTests: XCTestCase {
+    func testProtocolMacro() throws {
+        let source = """
+class ViewModel: ViewModelProtocol {
     private var somePropertyPrivate: String = ""
     var somePropertyGetAndSetImplicit: String = ""
     var somePropertyGetOnlyImplicit: String {
@@ -29,14 +30,15 @@ struct ViewModel: ViewModelProtocol {
     private func testPrivate() { }
     fileprivate func testFileprivate() { }
 }
-
+"""
+        let extensionNotIncluded = """
 extension ViewModel {
     func extensionFunctionsWilldNotBeIncluded() { }
 }
-```
+"""
+        
+        let expectedOutput = """
 
-## auto-generated code: 
-```swift
 protocol ViewModelProtocol {
     var somePropertyGetAndSetImplicit: String {
         get
@@ -55,4 +57,10 @@ protocol ViewModelProtocol {
     func function()
     func functionWithReturnType() -> String
 }
-```
+"""
+        assertMacroExpansion(["@Protocol", source, extensionNotIncluded].joined(separator: "\n"),
+                             expandedSource: [source, expectedOutput, extensionNotIncluded].joined(separator: "\n"),
+                             macros: testMacros,
+                             indentationWidth: .spaces(4))
+    }
+}
