@@ -123,4 +123,25 @@ protocol ViewModelProtocol {
                              macros: testMacros,
                              indentationWidth: .spaces(4))
     }
+    
+    func testAsync() throws {
+        let source = """
+struct ViewModel {
+    func asyncFunction() async -> String { "" }
+}
+"""
+        
+        let expectedOutput = """
+
+protocol ViewModelProtocol {
+
+    func asyncFunction() async -> String
+}
+"""
+        
+        assertMacroExpansion(["@Protocol", source].joined(separator: "\n"),
+                             expandedSource: [source, expectedOutput].joined(separator: "\n"),
+                             macros: testMacros,
+                             indentationWidth: .spaces(4))
+    }
 }

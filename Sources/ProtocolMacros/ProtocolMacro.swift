@@ -114,12 +114,13 @@ extension ProtocolMacro {
             }.joined(separator: ", ")
             let returnType = funcDecl.signature.returnClause?.type.description
                 .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            let asyncKeyword = funcDecl.signature.effectSpecifiers?.asyncSpecifier != nil ? " \(Keywords.async)" : .empty
             let returnSuffix = returnType.isEmpty ? .empty : " -> \(returnType)"
             var modifiers: String = .empty
             if funcDecl.modifiers.contains(where: { $0.name.text.contains(Keywords.static)}) {
                 modifiers.append("\(Keywords.static) ")
             }
-            return "\(modifiers)\(Keywords.func) \(funcName)\(generics)(\(parameters))\(returnSuffix)\(whereClause)"
+            return "\(modifiers)\(Keywords.func) \(funcName)\(generics)(\(parameters))\(asyncKeyword)\(returnSuffix)\(whereClause)"
         }.joined(separator: "\n")
     }
     

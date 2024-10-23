@@ -15,6 +15,7 @@ struct Keywords {
     static var `private`: String { "private" }
     static var `static`: String { "static" }
     static var `public`: String { "public" }
+    static var `async`: String { "async" }
     static var `associatedtype`: String { "associatedtype" }
 }
 

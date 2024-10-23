@@ -16,7 +16,7 @@ struct ViewModel: ViewModelProtocol {
         set { }
     }
     static func function() { }
-    func functionWithParameter(in parameter: String, parameter2: String) -> String { "" }
+    func functionWithParameter(in parameter: String, parameter2: String) async -> String { "" }
     func functionWithGenerics<T>(completion: @escaping (Result<T, Error>) -> Void) -> String { "" }
     func functionWithGenericsSpecifier<T: Decodable>(completion: @escaping (Result<T, Error>) -> Void) -> String { "" }
     func functionWithGenericsAndWhereClause<T, E>(completion: @escaping (Result<T, E>) -> Void) -> String where T: Decodable, E: Error { "" }

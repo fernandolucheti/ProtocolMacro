@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:ProtocolMacro}",
+            "name": "Debug ProtocolMacroClient",
+            "program": "${workspaceFolder:ProtocolMacro}/.build/debug/ProtocolMacroClient",
+            "preLaunchTask": "swift: Build Debug ProtocolMacroClient"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:ProtocolMacro}",
+            "name": "Release ProtocolMacroClient",
+            "program": "${workspaceFolder:ProtocolMacro}/.build/release/ProtocolMacroClient",
+            "preLaunchTask": "swift: Build Release ProtocolMacroClient"
+        }
+    ]
+}
