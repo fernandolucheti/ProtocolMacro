@@ -1,5 +1,5 @@
 # ProtocolMacro
-A macro that produces a protocol based on a class/struct public interface
+A macro that produces a protocol based on a class/struct non private interface
 
 ## Usage
  1 - add ProtocolMacro as a dependency  
@@ -12,45 +12,31 @@ A macro that produces a protocol based on a class/struct public interface
 import ProtocolMacro
 @Protocol
 struct ViewModel: ViewModelProtocol {
-    private var somePropertyPrivate: String = ""
-    var somePropertyGetAndSetImplicit: String = ""
-    var somePropertyGetOnlyImplicit: String {
+    var someProperty: String = ""
+    var someGetOnlyProperty: String {
         ""
     }
-    var somePropertyGetOnlyExplicit: String {
-        get { "" }
-    }
-    var somePropertyGetAndSetExplicit: String {
-        get { "" }
-        set { }
-    }
+    private var privatePropertiesNotIncluded: String = ""
     func function() { }
     func functionWithReturnType() -> String { "" }
-    private func testPrivate() { }
-    fileprivate func testFileprivate() { }
+    private func privateFunctionsNotIncluded() { }
+    fileprivate func fileprivateFunctionsNotIncluded() { }
 }
 
 extension ViewModel {
-    func extensionFunctionsWilldNotBeIncluded() { }
+    func extensionFunctionsNotIncluded() { }
 }
 ```
 
 ## auto-generated code: 
 ```swift
 protocol ViewModelProtocol {
-    var somePropertyGetAndSetImplicit: String {
+    var someProperty: String {
         get
         set
     }
-    var somePropertyGetOnlyImplicit: String {
+    var someGetOnlyProperty: String {
         get
-    }
-    var somePropertyGetOnlyExplicit: String {
-        get
-    }
-    var somePropertyGetAndSetExplicit: String {
-        get
-        set
     }
     func function()
     func functionWithReturnType() -> String

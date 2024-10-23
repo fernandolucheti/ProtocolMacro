@@ -3,6 +3,7 @@ import ProtocolMacro
 @Protocol
 struct ViewModel: ViewModelProtocol {
     private var somePropertyPrivate: String = ""
+    let someConstant: String
     var somePropertyGetAndSetImplicit: String = ""
     var somePropertyGetOnlyImplicit: String {
         ""
@@ -15,6 +16,7 @@ struct ViewModel: ViewModelProtocol {
         set { }
     }
     func function() { }
+    func functionWithParameter(in parameter: String, parameter2: String) -> String { "" }
     func functionWithReturnType() -> String { "" }
     private func testPrivate() { }
     fileprivate func testFileprivate() { }

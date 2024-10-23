@@ -14,6 +14,7 @@ final class ProtocolMacroTests: XCTestCase {
         let source = """
 class ViewModel: ViewModelProtocol {
     private var somePropertyPrivate: String = ""
+    let someConstant: Int = 0
     var somePropertyGetAndSetImplicit: String = ""
     var somePropertyGetOnlyImplicit: String {
         ""
@@ -26,6 +27,7 @@ class ViewModel: ViewModelProtocol {
         set { }
     }
     func function() { }
+    func functionWithParameter(in parameter: String, parameter2: String) -> String { "" }
     func functionWithReturnType() -> String { "" }
     private func testPrivate() { }
     fileprivate func testFileprivate() { }
@@ -40,6 +42,9 @@ extension ViewModel {
         let expectedOutput = """
 
 protocol ViewModelProtocol {
+    var someConstant: Int {
+        get
+    }
     var somePropertyGetAndSetImplicit: String {
         get
         set
@@ -55,6 +60,7 @@ protocol ViewModelProtocol {
         set
     }
     func function()
+    func functionWithParameter(in parameter: String, parameter2: String) -> String
     func functionWithReturnType() -> String
 }
 """
