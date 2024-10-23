@@ -26,7 +26,7 @@ class ViewModel: ViewModelProtocol {
         get { "" }
         set { }
     }
-    func function() { }
+    static func function() { }
     func functionWithParameter(in parameter: String, parameter2: String) -> String { "" }
     func functionWithReturnType() -> String { "" }
     private func testPrivate() { }
@@ -59,13 +59,67 @@ protocol ViewModelProtocol {
         get
         set
     }
-    func function()
+    static func function()
     func functionWithParameter(in parameter: String, parameter2: String) -> String
     func functionWithReturnType() -> String
 }
 """
         assertMacroExpansion(["@Protocol", source, extensionNotIncluded].joined(separator: "\n"),
                              expandedSource: [source, expectedOutput, extensionNotIncluded].joined(separator: "\n"),
+                             macros: testMacros,
+                             indentationWidth: .spaces(4))
+    }
+    
+    func testGenericsWhereClause() throws {
+        let source = """
+struct ViewModel<D, E>: ViewModelProtocol where E: Error, D: Decodable {
+    let someConstant: D
+    func functionWithGenericsAndWhereClause<T, E>(completion: @escaping (Result<T, E>) -> Void) -> String where T: Decodable, E: Error { "" }
+}
+"""
+        
+        let expectedOutput = """
+
+protocol ViewModelProtocol {
+    associatedtype D: Decodable
+    associatedtype E: Error
+    var someConstant: D {
+        get
+    }
+    func functionWithGenericsAndWhereClause<T, E>(completion: @escaping (Result<T, E>) -> Void) -> String where T: Decodable, E: Error
+}
+"""
+        
+        assertMacroExpansion(["@Protocol", source].joined(separator: "\n"),
+                             expandedSource: [source, expectedOutput].joined(separator: "\n"),
+                             macros: testMacros,
+                             indentationWidth: .spaces(4))
+    }
+    
+    func testGenerics() throws {
+        let source = """
+struct ViewModel<D: Decodable, E: Error> {
+    let someConstant: D
+    func functionWithGenerics<T>(completion: @escaping (Result<T, Error>) -> Void) -> String { "" }
+    func functionWithGenericsSpecifier<T: Decodable>(completion: @escaping (Result<T, Error>) -> Void) -> String { "" }
+}
+"""
+        
+        let expectedOutput = """
+
+protocol ViewModelProtocol {
+    associatedtype D: Decodable
+    associatedtype E: Error
+    var someConstant: D {
+        get
+    }
+    func functionWithGenerics<T>(completion: @escaping (Result<T, Error>) -> Void) -> String
+    func functionWithGenericsSpecifier<T: Decodable>(completion: @escaping (Result<T, Error>) -> Void) -> String
+}
+"""
+        
+        assertMacroExpansion(["@Protocol", source].joined(separator: "\n"),
+                             expandedSource: [source, expectedOutput].joined(separator: "\n"),
                              macros: testMacros,
                              indentationWidth: .spaces(4))
     }

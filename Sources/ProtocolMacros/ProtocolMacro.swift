@@ -20,7 +20,7 @@ public struct ProtocolMacro: PeerMacro {
         providingPeersOf declaration: some SwiftSyntax.DeclSyntaxProtocol,
         in context: some SwiftSyntaxMacros.MacroExpansionContext
     ) throws -> [SwiftSyntax.DeclSyntax] {
-                
+        
         let classDecl = declaration.as(ClassDeclSyntax.self)
         let structDecl = declaration.as(StructDeclSyntax.self)
         
@@ -37,9 +37,16 @@ public struct ProtocolMacro: PeerMacro {
         let properties = stringify(nonPrivateMembers.properties)
         let functions = stringify(nonPrivateMembers.functions)
         
+        let genericParameters = classDecl?.genericParameterClause?.description ??
+        structDecl?.genericParameterClause?.description ?? .empty
+        let genericWhereClause = classDecl?.genericWhereClause?.description ??
+        structDecl?.genericWhereClause?.description ?? .empty
+        let associatedTypes = createAssociatedtypes(genericParameters, whereClause: genericWhereClause)
+        
         let protocolDecl = ProtocolDeclSyntax(name: "\(raw: protocolName)",
                                               memberBlockBuilder: {
             """
+            \(raw: associatedTypes)
             \(raw: properties)
             \(raw: functions)
             """
@@ -77,13 +84,25 @@ extension ProtocolMacro {
             let propertyType = varDecl.bindings.first?.typeAnnotation?.type.description
                 .trimmingCharacters(in: .whitespacesAndNewlines) ?? "Any"
             let accessors = varDecl.hasSetter ? "{ \(Keywords.get) \(Keywords.set) }" : "{ \(Keywords.get) }"
-            return "\(Keywords.var) \(propertyName): \(propertyType) \(accessors)"
+            var modifiers: String = .empty
+            if varDecl.modifiers.contains(where: { $0.name.text.contains(Keywords.static)}) {
+                modifiers.append("\(Keywords.static) ")
+            }
+            return "\(modifiers)\(Keywords.var) \(propertyName): \(propertyType) \(accessors)"
         }.joined(separator: "\n")
     }
     
     private static func stringify(_ functions: [FunctionDeclSyntax]) -> String {
         functions.compactMap { funcDecl in
             let funcName = funcDecl.name.text
+            var generics: String = .empty
+            if let genericParameter = funcDecl.genericParameterClause?.description {
+                generics = genericParameter
+            }
+            var whereClause: String = .empty
+            if let genericWhereClause = funcDecl.genericWhereClause?.description {
+                whereClause = " \(genericWhereClause)"
+            }
             let parameters = funcDecl.signature.parameterClause.parameters.map { param in
                 var parameterName = param.firstName.text
                 if let secondParamName = param.secondName?.text {
@@ -96,7 +115,37 @@ extension ProtocolMacro {
             let returnType = funcDecl.signature.returnClause?.type.description
                 .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
             let returnSuffix = returnType.isEmpty ? .empty : " -> \(returnType)"
-            return "\(Keywords.func) \(funcName)(\(parameters))\(returnSuffix)"
+            var modifiers: String = .empty
+            if funcDecl.modifiers.contains(where: { $0.name.text.contains(Keywords.static)}) {
+                modifiers.append("\(Keywords.static) ")
+            }
+            return "\(modifiers)\(Keywords.func) \(funcName)\(generics)(\(parameters))\(returnSuffix)\(whereClause)"
         }.joined(separator: "\n")
+    }
+    
+    private static func createAssociatedtypes(_ genericClause: String, whereClause: String) -> String {
+        guard !genericClause.isEmpty else { return .empty }
+        return genericClause
+            .replacingOccurrences(of: SyntaxTokens.leftAngleBracket, with: String.empty)
+            .replacingOccurrences(of: SyntaxTokens.rightAngleBracket, with: String.empty)
+            .replacingOccurrences(of: " ", with: String.empty)
+            .components(separatedBy: ",")
+            .map { genericType in
+                var genericType = genericType
+                let typeSpecifier = (whereClause
+                    .replacingOccurrences(of: Keywords.where, with: String.empty)
+                    .components(separatedBy: ",")
+                    .first { typeIdentifier  in
+                        typeIdentifier
+                            .components(separatedBy: ":")
+                            .first?
+                            .trimmingCharacters(in: .whitespacesAndNewlines) == genericType
+                    } ?? .empty)
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+                if !typeSpecifier.isEmpty {
+                    genericType = typeSpecifier
+                }
+                return "\(Keywords.associatedtype) \(genericType)"
+            }.joined(separator: "\n")
     }
 }
