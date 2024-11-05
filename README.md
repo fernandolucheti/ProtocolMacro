@@ -13,14 +13,8 @@ import ProtocolMacro
 @Protocol
 struct ViewModel: ViewModelProtocol {
     var someProperty: String = ""
-    var someGetOnlyProperty: String {
-        ""
-    }
-    private var privatePropertiesNotIncluded: String = ""
     func function() { }
-    func functionWithReturnType() -> String { "" }
     private func privateFunctionsNotIncluded() { }
-    fileprivate func fileprivateFunctionsNotIncluded() { }
 }
 
 extension ViewModel {
@@ -35,10 +29,6 @@ protocol ViewModelProtocol {
         get
         set
     }
-    var someGetOnlyProperty: String {
-        get
-    }
     func function()
-    func functionWithReturnType() -> String
 }
 ```
